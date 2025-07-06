@@ -1,0 +1,11 @@
+.idea/
+cover.out
+coverage.html
+
+# don't accidentally leak metadata
+input/*
+output/*
+
+# build
+main
+seedyfv2
