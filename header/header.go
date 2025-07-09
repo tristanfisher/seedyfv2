@@ -29,10 +29,6 @@ func GetHeader(r io.Reader) (file_format.StructuredStorageHeader, error) {
 		return file_format.StructuredStorageHeader{}, errors.New("invalid header, too short")
 	}
 
-	//fmt.Println(util.Btoh(headerBytes[0:7]))
-
-	//classIdBytes := make([]byte)
-
 	le := file_format.LittleEndian{}
 	// try to get endianness. spec states that this should be little-endian, but confirm
 	// we expect 0xFFFE for intel / apple silicon / little-endian
@@ -124,7 +120,7 @@ func GetHeader(r io.Reader) (file_format.StructuredStorageHeader, error) {
 	if err != nil {
 		return file_format.StructuredStorageHeader{}, err
 	}
-	
+
 	// xxd -c 8 my_input is useful for parsing this file
 	header := file_format.StructuredStorageHeader{
 		// e.g. d0cf 11e0 a1b1 1ae1

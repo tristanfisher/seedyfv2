@@ -3,6 +3,7 @@ package file_format
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"log"
 )
 
@@ -239,4 +240,29 @@ type StructuredStorageHeader struct {
 	// [4CH,436] the SECTs of first 109 FAT sectors
 	// decimal offset: 76
 	SectFat [109]SECT
+}
+
+func (ssh StructuredStorageHeader) String() string {
+	return fmt.Sprintf(""+
+		"<ABSig: %x ; "+
+		"Clsid: %x ; "+
+		"MinorVersion: %x ; "+
+		"DLLVersion: %x ; "+
+		"ByteOrder: %x ; "+
+		"SectorShift: %x ; "+
+		"MiniSectorShift: %x ; "+
+		"Reserved: %x ; "+
+		"Reserved2: %x ; "+
+		"CSectDir: %x ; "+
+		"CSectFat: %x ; "+
+		"SectDirStart: %x ; "+
+		"Signature: %x ; "+
+		"MiniSectorCutoff: %x ; "+
+		"SectMiniFatStart: %x ; "+
+		"CSectMiniFat: %x ; "+
+		"SectDifStart: %x ; "+
+		"CSectDif: %x ; "+
+		"SectFat: %x>",
+		ssh.ABSig, ssh.Clsid, ssh.MinorVersion, ssh.DllVersion, ssh.ByteOrder, ssh.SectorShift, ssh.MiniSectorShift, ssh.Reserved, ssh.Reserved2,
+		ssh.CSectDir, ssh.CSectFat, ssh.SectDirStart, ssh.Signature, ssh.MiniSectorCutoff, ssh.SectMiniFatStart, ssh.CSectMiniFat, ssh.SectDifStart, ssh.CSectDif, ssh.SectFat)
 }
