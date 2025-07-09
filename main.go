@@ -14,7 +14,6 @@ import (
 	"os"
 	"reflect"
 	"seedyfv2/header"
-	"seedyfv2/util"
 	"time"
 )
 
@@ -136,6 +135,6 @@ func main() {
 		logErr.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println(util.Btoh(fHeader.ABSig[:]))
+	_ = fHeader
 
 }
