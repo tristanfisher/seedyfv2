@@ -144,10 +144,9 @@ type GUID [16]byte
 // StructuredStorageHeader contains the information
 // required for instantiating and parsing a compound file.
 //
-// Comments from:
-//
-//	Advanced Authoring Format (AAF)
-//	Low-Level Container Specification v1.0.1
+// Comments predominantly from:
+// - Advanced Authoring Format (AAF) Low-Level Container Specification v1.0.1
+// - [MS-CFB] - v20240423
 type StructuredStorageHeader struct {
 
 	// [offset from start (bytes in hex), length (bytes)]
@@ -168,9 +167,9 @@ type StructuredStorageHeader struct {
 
 	// [1AH,02] major version of the dll/format: 3 for
 	// 512-byte sectors, 4 for 4 KB sectors
-	// aka MajorVersion
+	// aka DLL Version in some documentation
 	// decimal offset: 26
-	DllVersion USHORT
+	MajorVersion USHORT
 
 	// [1CH,02] 0xFFFE: indicates Intel byte-ordering
 	// decimal offset: 28
@@ -263,6 +262,6 @@ func (ssh StructuredStorageHeader) String() string {
 		"SectDifStart: %x ; "+
 		"CSectDif: %x ; "+
 		"SectFat: %x>",
-		ssh.ABSig, ssh.Clsid, ssh.MinorVersion, ssh.DllVersion, ssh.ByteOrder, ssh.SectorShift, ssh.MiniSectorShift, ssh.Reserved, ssh.Reserved2,
+		ssh.ABSig, ssh.Clsid, ssh.MinorVersion, ssh.MajorVersion, ssh.ByteOrder, ssh.SectorShift, ssh.MiniSectorShift, ssh.Reserved, ssh.Reserved2,
 		ssh.CSectDir, ssh.CSectFat, ssh.SectDirStart, ssh.Signature, ssh.MiniSectorCutoff, ssh.SectMiniFatStart, ssh.CSectMiniFat, ssh.SectDifStart, ssh.CSectDif, ssh.SectFat)
 }

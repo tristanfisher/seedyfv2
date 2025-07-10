@@ -134,7 +134,7 @@ func GetHeader(r io.Reader) (file_format.StructuredStorageHeader, error) {
 
 		// 3 for 512 byte sectors, 4 for 4KB sectors
 		// 0300
-		DllVersion: dllVersion,
+		MajorVersion: dllVersion,
 
 		ByteOrder: byteOrder,
 
