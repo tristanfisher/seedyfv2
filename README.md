@@ -27,6 +27,7 @@ This file is a virtual filesystem with branching implementations of `sectors` - 
 Other sectors can exist anywhere else in the file.  Other sectors include:
 
 - File Allocation Tables (FAT)
+- 
 - Mini file allocation tables (MiniFAT)
 - Double-indirect FAT (DIFAT) (represents storage of FAT sectors, final 4 bytes reserved for DIFAT chaining)
 - Streams

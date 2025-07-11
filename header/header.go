@@ -16,7 +16,7 @@ func (bo ByteOrderError) Error() string {
 	return bo.Msg
 }
 
-// getHeader handles decoding CDFV2 file headers
+// GetHeader handles decoding CDFV2 file headers.  This is a special sector that exists in the first 512 bytes of a file.
 func GetHeader(r io.Reader) (file_format.StructuredStorageHeader, error) {
 
 	headerBytes := make([]byte, CDFV2HeaderBytes)
@@ -164,7 +164,7 @@ func GetHeader(r io.Reader) (file_format.StructuredStorageHeader, error) {
 
 		CSectDif: cSectDif,
 
-		SectFat: sectFat,
+		DIFAT: sectFat,
 	}
 
 	return header, nil

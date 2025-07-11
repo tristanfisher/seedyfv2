@@ -137,6 +137,6 @@ func main() {
 	}
 	_ = fHeader
 
-	fmt.Println(fHeader)
+	fmt.Println(fHeader.SectorIndexTable())
 
 }

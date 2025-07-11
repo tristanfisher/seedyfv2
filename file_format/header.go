@@ -78,68 +78,22 @@ func (le LittleEndian) SECTFAT(b []byte) ([109]SECT, error) {
 	return sectors, nil
 }
 
-/*
-
-microsoft types
- double word 32-bit unsigned: dword -> uint32
- word 16-bit unsigned: word -> uint16
-
-Sector types
-
-typedef unsigned long ULONG  // 4 bytes
-typedef unsigned short USHORT // 2 bytes
-typedef short OFFSET // 2 bytes
-typedef ULONG SECT // 4 bytes
-typedef ULONG FSINDEX // 4 bytes
-typedef USHORT FSOFFSET // 2 bytes
-typedef USHORT WCHAR // 2 bytes
-typedef ULONG DFSIGNATURE // 4 bytes
-typedef unsigned char BYTE // 1 byte
-typedef unsigned short WORD // 2 bytes
-typedef unsigned long DWORD // 4 bytes
-typedef ULONG SID // 4 bytes
-typedef GUID CLSID // 16 bytes
-
-// 64-bit value representing number of 100 nanoseconds since January 1, 1601
-typedef struct tagFILETIME {
-DWORD dwLowDateTime;
-DWORD dwHighDateTime;
-} FILETIME;
-
-
-const SECT MAXREGSECT = 0xFFFFFFFA; // maximum SECT
-const SECT DIFSECT = 0xFFFFFFFC; // denotes a DIFAT sector in a FAT
-const SECT FATSECT = 0xFFFFFFFD; // denotes a FAT sector in a FAT
-const SECT ENDOFCHAIN = 0xFFFFFFFE; // end of a virtual stream chain
-const SECT FREESECT = 0xFFFFFFFF; // unallocated sector
-const SID MAXREGSID = 0xFFFFFFFA; // maximum directory entry ID
-const SID NOSTREAM = 0xFFFFFFFF; // unallocated directory entry
-*/
-
 //
 // aliased types for ease of referencing against documentation
 //
 
-// USHORT is 16-bit unsigned: ushort -> uint16
-type USHORT uint16
-
-// ULONG is 64-bit unsigned: ulong -> uint64, but defined as 32-bit in the spec (4 bytes) -> uint32
-type ULONG uint32 // note - per spec a 32 not 64
-
-// CHAR is 8-bit alias: char -> byte
-type CHAR byte
-
 // FSINDEX is an alias for a ULONG (64-bit unsigned)
 type FSINDEX ULONG
 
-// SECT / SID are "ulong" types that are uint32
-type SECT ULONG
 type DFSIGNATURE ULONG
 
 // GUID -> 16 byte structure with different representations. Microsoft type.
 //
+//	 typedef GUID CLSID // 16 bytes
 //	https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/4926e530-816e-41c2-b251-ec5c7aca018a
 type GUID [16]byte
+
+// /aliases
 
 // StructuredStorageHeader contains the information
 // required for instantiating and parsing a compound file.
@@ -238,7 +192,7 @@ type StructuredStorageHeader struct {
 
 	// [4CH,436] the SECTs of first 109 FAT sectors
 	// decimal offset: 76
-	SectFat [109]SECT
+	DIFAT [109]SECT
 }
 
 func (ssh StructuredStorageHeader) String() string {
@@ -246,7 +200,7 @@ func (ssh StructuredStorageHeader) String() string {
 		"<ABSig: %x ; "+
 		"Clsid: %x ; "+
 		"MinorVersion: %x ; "+
-		"DLLVersion: %x ; "+
+		"MajorVersion: %x ; "+
 		"ByteOrder: %x ; "+
 		"SectorShift: %x ; "+
 		"MiniSectorShift: %x ; "+
@@ -261,7 +215,32 @@ func (ssh StructuredStorageHeader) String() string {
 		"CSectMiniFat: %x ; "+
 		"SectDifStart: %x ; "+
 		"CSectDif: %x ; "+
-		"SectFat: %x>",
+		"DIFAT: %x>",
 		ssh.ABSig, ssh.Clsid, ssh.MinorVersion, ssh.MajorVersion, ssh.ByteOrder, ssh.SectorShift, ssh.MiniSectorShift, ssh.Reserved, ssh.Reserved2,
-		ssh.CSectDir, ssh.CSectFat, ssh.SectDirStart, ssh.Signature, ssh.MiniSectorCutoff, ssh.SectMiniFatStart, ssh.CSectMiniFat, ssh.SectDifStart, ssh.CSectDif, ssh.SectFat)
+		ssh.CSectDir, ssh.CSectFat, ssh.SectDirStart, ssh.Signature, ssh.MiniSectorCutoff, ssh.SectMiniFatStart, ssh.CSectMiniFat, ssh.SectDifStart, ssh.CSectDif, ssh.DIFAT)
+}
+
+// SectorIndexTable maps sect numbers to the next sector in the chain or special value (e.g. ffffffff for empty/free sector)
+// unsure of return value.
+// this is a double indirect FAT lookup
+func (ssh StructuredStorageHeader) SectorIndexTable() (map[SECT]uint32, error) {
+
+	ret := map[SECT]uint32{}
+
+	// SECT and SID are both expected to be ULONG
+	FREESECTULong := ULONG(FREESECT)
+	for idx, v := range ssh.DIFAT {
+		vULong := ULONG(v)
+		if vULong == FREESECTULong {
+			continue
+		}
+		ret[v] = 0
+
+		if idx == len(ssh.DIFAT)-1 && vULong != 0 {
+			return ret, errors.New("sector chains for double-indirect fat not supported.  please request improvements.")
+		}
+
+	}
+
+	return ret, nil
 }
